@@ -143,6 +143,14 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
+        .deadline-banner .countdown {
+            font-size: 120px;
+            font-weight: bold;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 8px;
+        }
+
         @keyframes pulse {
             0%, 100% {
                 transform: scale(1);
@@ -556,6 +564,7 @@
         var wifiDisplayElement = document.getElementById('wifi-display');
         var wifiInfoElement = document.getElementById('wifi-info');
         var serverTimeOffset = 0; // Difference between server time and local time
+        var deadlineCountdownElement = null;
 
         // Utility: Make HTTP request
         function httpGet(url, callback) {
@@ -646,6 +655,35 @@
             // Use event timezone if available
             var timezone = eventData ? eventData.timezone : null;
             currentTimeElement.textContent = formatTime12Hour(correctedTime, timezone);
+        }
+
+        // Update deadline countdown
+        function updateDeadlineCountdown() {
+            if (!deadlineCountdownElement) return;
+
+            var now = new Date();
+            var correctedTime = new Date(now.getTime() + serverTimeOffset);
+
+            // Set deadline to today at 18:45
+            var deadline = new Date(correctedTime);
+            deadline.setHours(18, 45, 0, 0);
+
+            // Calculate time difference
+            var diff = deadline.getTime() - correctedTime.getTime();
+
+            if (diff <= 0) {
+                deadlineCountdownElement.textContent = '00:00';
+                return;
+            }
+
+            var minutes = Math.floor(diff / (1000 * 60));
+            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            // Format as MM:SS
+            var minStr = minutes < 10 ? '0' + minutes : minutes;
+            var secStr = seconds < 10 ? '0' + seconds : seconds;
+
+            deadlineCountdownElement.textContent = minStr + ':' + secStr;
         }
 
         // Update WiFi info
@@ -741,8 +779,13 @@
 
             // Deadline Banner
             var deadlineBanner = createElement('div', 'deadline-banner');
-            var deadlineText = createElement('h2', null, 'SUBMISSION DEADLINE IS 18:45');
+            var deadlineText = createElement('h2', null, 'SUBMISSION DEADLINE');
             deadlineBanner.appendChild(deadlineText);
+
+            var countdown = createElement('div', 'countdown', '00:00');
+            deadlineBanner.appendChild(countdown);
+            deadlineCountdownElement = countdown;
+
             contentElement.appendChild(deadlineBanner);
 
             // Get current schedule info (hardcoded)
@@ -872,6 +915,7 @@
             updateData();
             setInterval(updateData, POLL_INTERVAL);
             setInterval(updateClock, 1000); // Update clock every second
+            setInterval(updateDeadlineCountdown, 1000); // Update countdown every second
             startModalTimer();
         }
 
