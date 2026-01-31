@@ -25,10 +25,14 @@
         }
 
         .header {
+            position: relative;
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             border-bottom: 3px solid #fff;
-            padding-bottom: 30px;
+            padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .header h1 {
@@ -42,9 +46,40 @@
             opacity: 0.8;
         }
 
+        .header-content {
+            flex: 1;
+        }
+
+        .qr-side {
+            position: absolute;
+            text-align: center;
+        }
+
+        .qr-left {
+            left: 20px;
+        }
+
+        .qr-right {
+            right: 20px;
+        }
+
+        .qr-side img {
+            width: 150px;
+            height: 150px;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .qr-side .label {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
         /* Current Schedule Section */
         .current-section {
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
 
         .section-title {
@@ -187,8 +222,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>BLITZ ANKARA v2</h1>
-            <div class="subtitle" id="event-subtitle">Live Event</div>
+            <div class="qr-side qr-left">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://docs.monad.xyz" alt="Docs QR">
+                <div class="label">docs.monad.xyz</div>
+            </div>
+            <div class="header-content">
+                <h1>BLITZ ANKARA v2</h1>
+                <div class="subtitle" id="event-subtitle">Live Event</div>
+            </div>
+            <div class="qr-side qr-right">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://discord.gg/monaddev" alt="Discord QR">
+                <div class="label">discord.gg/monaddev</div>
+            </div>
         </div>
 
         <div id="content" class="loading">
