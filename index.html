@@ -634,69 +634,63 @@
             }
         }
 
-        // Calculate current schedule item
-        function getCurrentScheduleInfo(schedule, eventStartTime) {
-            if (!schedule || schedule.length === 0) {
-                return null;
-            }
+        // Hardcoded schedule for Blitz Ankara v2
+        var hardcodedSchedule = [
+            { activity: 'Registration & Breakfast', start: '09:00', end: '09:30' },
+            { activity: 'Monad101', start: '09:30', end: '10:00' },
+            { activity: 'How to vibe-code by port', start: '10:00', end: '10:30' },
+            { activity: 'Lunch & Hacking Period', start: '10:30', end: '18:45' },
+            { activity: 'Submission Deadline - 18:45', start: '18:45', end: '19:00' },
+            { activity: 'Dinner & Project Demos & Voting Period', start: '19:00', end: '20:45' },
+            { activity: 'Award Ceremony & Closing Remarks', start: '20:45', end: '21:00' }
+        ];
 
+        // Calculate current schedule item from hardcoded schedule
+        function getCurrentScheduleInfo() {
             var now = new Date();
-            var calculatedSchedule = [];
+            var currentHour = now.getHours();
+            var currentMinute = now.getMinutes();
+            var currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-            // Process schedule items
-            for (var i = 0; i < schedule.length; i++) {
-                var item = schedule[i];
-                var startTime, endTime;
-
-                // New format: absolute timestamps
-                if (item.start_time && item.end_time) {
-                    startTime = new Date(item.start_time);
-                    endTime = new Date(item.end_time);
-                }
-                // Legacy format: offset-based
-                else if (typeof item.offset_minutes !== 'undefined' && item.duration_minutes) {
-                    var eventStart = new Date(eventStartTime);
-                    startTime = new Date(eventStart.getTime() + item.offset_minutes * 60 * 1000);
-                    endTime = new Date(startTime.getTime() + item.duration_minutes * 60 * 1000);
-                }
-                else {
-                    continue;
-                }
-
-                var timezone = eventData ? eventData.timezone : null;
-                var timeDisplay = formatTime12Hour(startTime, timezone) + ' - ' + formatTime12Hour(endTime, timezone);
-
-                calculatedSchedule.push({
-                    activity: item.activity,
-                    type: item.type,
-                    startTime: startTime,
-                    endTime: endTime,
-                    timeDisplay: timeDisplay
-                });
+            function timeToMinutes(timeStr) {
+                var parts = timeStr.split(':');
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
             }
-
-            // Sort by start time
-            calculatedSchedule.sort(function(a, b) {
-                return a.startTime.getTime() - b.startTime.getTime();
-            });
 
             // Find current activity
-            for (var j = 0; j < calculatedSchedule.length; j++) {
-                if (now >= calculatedSchedule[j].startTime && now < calculatedSchedule[j].endTime) {
-                    var nextActivity = j + 1 < calculatedSchedule.length
-                        ? calculatedSchedule[j + 1]
-                        : null;
+            for (var i = 0; i < hardcodedSchedule.length; i++) {
+                var item = hardcodedSchedule[i];
+                var startMinutes = timeToMinutes(item.start);
+                var endMinutes = timeToMinutes(item.end);
+
+                if (currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes) {
+                    var nextItem = i + 1 < hardcodedSchedule.length ? hardcodedSchedule[i + 1] : null;
 
                     return {
-                        activity: calculatedSchedule[j].activity,
-                        timeDisplay: calculatedSchedule[j].timeDisplay,
-                        nextActivity: nextActivity ? nextActivity.activity : null,
-                        nextTime: nextActivity ? nextActivity.timeDisplay : null
+                        activity: item.activity,
+                        timeDisplay: formatTimeRange(item.start, item.end),
+                        nextActivity: nextItem ? nextItem.activity : null,
+                        nextTime: nextItem ? formatTimeRange(nextItem.start, nextItem.end) : null
                     };
                 }
             }
 
             return null;
+        }
+
+        // Format time range (HH:MM - HH:MM to 12-hour format)
+        function formatTimeRange(start, end) {
+            function format24To12(time24) {
+                var parts = time24.split(':');
+                var hours = parseInt(parts[0]);
+                var minutes = parts[1];
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                return hours + ':' + minutes + ' ' + ampm;
+            }
+
+            return format24To12(start) + ' - ' + format24To12(end);
         }
 
         // Create DOM element with text content
@@ -711,10 +705,8 @@
         function render() {
             contentElement.innerHTML = '';
 
-            // Get current schedule info
-            var scheduleInfo = eventData && eventData.schedule
-                ? getCurrentScheduleInfo(eventData.schedule, eventData.start_time)
-                : null;
+            // Get current schedule info (hardcoded)
+            var scheduleInfo = getCurrentScheduleInfo();
 
             // Current Schedule Section
             var currentSection = createElement('div', 'current-section');
