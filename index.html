@@ -302,6 +302,75 @@
             }
         }
 
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 4px solid #7c3aed;
+            padding: 60px 80px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 900px;
+            box-shadow: 0 0 50px rgba(124, 58, 237, 0.5);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal-content h2 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            color: #7c3aed;
+            line-height: 1.3;
+        }
+
+        .modal-close {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: #7c3aed;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal-close:hover {
+            background: #6b21a8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /* Bottom QR Codes */
         .qr-bottom {
             position: fixed;
@@ -379,6 +448,13 @@
     </div>
 
     <div id="status" class="status">● Connecting</div>
+
+    <div id="tweet-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Lütfen projenizi ve kendinizi @port_dev tagleyerek tweet atın, RT edeceğim!</h2>
+            <button class="modal-close" onclick="closeModal()">Tamam</button>
+        </div>
+    </div>
 
     <div class="news-ticker">
         <div class="ticker-content">
@@ -767,6 +843,26 @@
             });
         }
 
+        // Modal functions
+        var modalElement = document.getElementById('tweet-modal');
+
+        function showModal() {
+            modalElement.className = 'modal-overlay show';
+        }
+
+        function closeModal() {
+            modalElement.className = 'modal-overlay';
+        }
+
+        // Show modal every 2 minutes
+        function startModalTimer() {
+            setInterval(function() {
+                showModal();
+                // Auto-close after 10 seconds
+                setTimeout(closeModal, 10000);
+            }, 120000); // 2 minutes
+        }
+
         // Initialize
         function init() {
             updateStatus(false, false);
@@ -774,6 +870,7 @@
             updateData();
             setInterval(updateData, POLL_INTERVAL);
             setInterval(updateClock, 1000); // Update clock every second
+            startModalTimer();
         }
 
         // DVD-style bouncing video animation
