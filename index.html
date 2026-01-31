@@ -341,8 +341,6 @@
             border: 3px solid #7c3aed;
             border-radius: 12px;
             padding: 25px;
-            max-height: 600px;
-            overflow-y: auto;
         }
 
         .presentation-order h3 {
@@ -622,7 +620,7 @@
     </div>
 
     <div id="status" class="status">● Connecting</div>
-    <div class="version">v2.3</div>
+    <div class="version">v2.4</div>
 
     <div id="tweet-modal" class="modal-overlay">
         <div class="modal-content">
@@ -998,7 +996,30 @@
                         return titleA.localeCompare(titleB);
                     });
 
+                    // Find current presenter index
+                    var currentIndex = -1;
                     for (var i = 0; i < sortedProjects.length; i++) {
+                        if (currentPresenter && currentPresenter.projectId === sortedProjects[i].id) {
+                            currentIndex = i;
+                            break;
+                        }
+                    }
+
+                    // Show only 5 items, centered around current presenter
+                    var startIndex = 0;
+                    var endIndex = Math.min(5, sortedProjects.length);
+
+                    if (currentIndex !== -1) {
+                        // Center around current presenter
+                        startIndex = Math.max(0, currentIndex - 2);
+                        endIndex = Math.min(sortedProjects.length, startIndex + 5);
+                        // Adjust if at end
+                        if (endIndex - startIndex < 5) {
+                            startIndex = Math.max(0, endIndex - 5);
+                        }
+                    }
+
+                    for (var i = startIndex; i < endIndex; i++) {
                         var project = sortedProjects[i];
                         var isCurrent = currentPresenter && currentPresenter.projectId === project.id;
                         var itemClass = isCurrent ? 'order-item current' : 'order-item';
