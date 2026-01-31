@@ -533,12 +533,15 @@
                     if (xhr.status === 200) {
                         try {
                             var data = JSON.parse(xhr.responseText);
-                            // Get server time from response header
-                            var dateHeader = xhr.getResponseHeader('Date');
-                            if (dateHeader) {
-                                var serverTime = new Date(dateHeader);
-                                var localTime = new Date();
-                                serverTimeOffset = serverTime.getTime() - localTime.getTime();
+                            // Get server time from response header (only once)
+                            if (serverTimeOffset === 0) {
+                                var dateHeader = xhr.getResponseHeader('Date');
+                                if (dateHeader) {
+                                    var serverTime = new Date(dateHeader);
+                                    var localTime = new Date();
+                                    serverTimeOffset = serverTime.getTime() - localTime.getTime();
+                                    console.log('Server time offset set:', serverTimeOffset + 'ms');
+                                }
                             }
                             callback(null, data);
                         } catch (e) {
