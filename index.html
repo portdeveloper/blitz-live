@@ -664,9 +664,9 @@
             var now = new Date();
             var correctedTime = new Date(now.getTime() + serverTimeOffset);
 
-            // Set deadline to today at 18:45
+            // Set deadline to today at 18:55
             var deadline = new Date(correctedTime);
-            deadline.setHours(18, 45, 0, 0);
+            deadline.setHours(18, 55, 0, 0);
 
             // Calculate time difference
             var diff = deadline.getTime() - correctedTime.getTime();
