@@ -309,10 +309,10 @@
                 <h1>BLITZ ANKARA v2</h1>
                 <div class="info-bar">
                     <div class="info-item" id="clock-display">
-                        <strong>🕐</strong><span id="current-time">--:--</span>
+                        <span id="current-time">--:--</span>
                     </div>
                     <div class="info-item" id="wifi-display" style="display:none;">
-                        <strong>📶</strong><span id="wifi-info">--</span>
+                        <span id="wifi-info">--</span>
                     </div>
                 </div>
             </div>
@@ -419,9 +419,16 @@
 
         // Update WiFi info
         function updateWiFi() {
-            if (eventData && eventData.wifi_name) {
-                wifiInfoElement.textContent = eventData.wifi_name +
-                    (eventData.wifi_password ? ' / ' + eventData.wifi_password : '');
+            if (eventData && (eventData.wifi_name || eventData.wifi_password)) {
+                var text = '';
+                if (eventData.wifi_name) {
+                    text += 'WiFi Name: ' + eventData.wifi_name;
+                }
+                if (eventData.wifi_password) {
+                    if (text) text += ' | ';
+                    text += 'WiFi Password: ' + eventData.wifi_password;
+                }
+                wifiInfoElement.textContent = text;
                 wifiDisplayElement.style.display = 'block';
             } else {
                 wifiDisplayElement.style.display = 'none';
