@@ -580,7 +580,23 @@
         }
 
         // Format time in 12-hour format
-        function formatTime12Hour(date) {
+        function formatTime12Hour(date, timezone) {
+            try {
+                // Try to use Intl API with event timezone if available
+                if (timezone && typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+                    var formatter = new Intl.DateTimeFormat('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                        timeZone: timezone
+                    });
+                    return formatter.format(date);
+                }
+            } catch (e) {
+                console.warn('Timezone formatting failed, using local:', e);
+            }
+
+            // Fallback for old browsers
             var hours = date.getHours();
             var minutes = date.getMinutes();
             var ampm = hours >= 12 ? 'PM' : 'AM';
@@ -595,7 +611,9 @@
             var now = new Date();
             // Apply server time offset to correct for wrong local clocks
             var correctedTime = new Date(now.getTime() + serverTimeOffset);
-            currentTimeElement.textContent = formatTime12Hour(correctedTime);
+            // Use event timezone if available
+            var timezone = eventData ? eventData.timezone : null;
+            currentTimeElement.textContent = formatTime12Hour(correctedTime, timezone);
         }
 
         // Update WiFi info
@@ -645,7 +663,8 @@
                     continue;
                 }
 
-                var timeDisplay = formatTime12Hour(startTime) + ' - ' + formatTime12Hour(endTime);
+                var timezone = eventData ? eventData.timezone : null;
+                var timeDisplay = formatTime12Hour(startTime, timezone) + ' - ' + formatTime12Hour(endTime, timezone);
 
                 calculatedSchedule.push({
                     activity: item.activity,
