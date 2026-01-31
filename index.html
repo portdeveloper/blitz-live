@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blitz Ankara v2 - Live Presentations</title>
+    <title>Blitz Ankara v2 - Live</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -37,77 +37,119 @@
             margin-bottom: 10px;
         }
 
-        .header p {
+        .header .subtitle {
             font-size: 36px;
             opacity: 0.8;
         }
 
-        .presenter-section {
-            margin-top: 40px;
+        /* Current Schedule Section */
+        .current-section {
+            margin-bottom: 60px;
         }
 
         .section-title {
-            font-size: 48px;
-            margin-bottom: 30px;
+            font-size: 42px;
+            margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            opacity: 0.7;
+        }
+
+        .current-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 4px solid #fff;
+            padding: 50px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .current-card .activity {
+            font-size: 80px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .current-card .time {
+            font-size: 48px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .current-card .next-up {
+            font-size: 36px;
+            opacity: 0.6;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .current-card .next-up strong {
+            opacity: 1;
+        }
+
+        /* Presenter Section (shown during presentations) */
+        .presenter-section {
+            margin-bottom: 60px;
         }
 
         .presenter-card {
-            background-color: #1a1a1a;
-            border: 3px solid #fff;
-            padding: 40px;
-            border-radius: 8px;
+            background-color: #0a0a0a;
+            border-left: 6px solid #fff;
+            padding: 30px 40px;
         }
 
-        .presenter-card h2 {
-            font-size: 64px;
-            margin-bottom: 20px;
+        .presenter-card h3 {
+            font-size: 56px;
+            margin-bottom: 15px;
         }
 
         .presenter-card .team {
             font-size: 36px;
-            opacity: 0.9;
-            margin-bottom: 20px;
+            opacity: 0.8;
+            margin-bottom: 15px;
         }
 
         .presenter-card .description {
             font-size: 32px;
-            line-height: 1.8;
-            opacity: 0.85;
+            line-height: 1.6;
+            opacity: 0.7;
         }
 
-        .no-presenter {
+        /* No Activity State */
+        .no-activity {
             text-align: center;
             padding: 100px 40px;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
-        .no-presenter p {
+        .no-activity p {
             font-size: 48px;
         }
 
-        .projects-list {
+        /* Projects Grid */
+        .projects-grid {
             margin-top: 60px;
         }
 
         .project-item {
             background-color: #0a0a0a;
-            border-left: 4px solid #fff;
-            padding: 20px 30px;
-            margin-bottom: 15px;
+            border-left: 3px solid #444;
+            padding: 15px 25px;
+            margin-bottom: 12px;
         }
 
-        .project-item h3 {
-            font-size: 36px;
-            margin-bottom: 8px;
+        .project-item h4 {
+            font-size: 32px;
+            margin-bottom: 6px;
         }
 
         .project-item .team {
-            font-size: 24px;
-            opacity: 0.7;
+            font-size: 22px;
+            opacity: 0.6;
         }
 
+        /* Loading & Error States */
         .loading {
             text-align: center;
             padding: 100px;
@@ -121,12 +163,16 @@
             color: #ff4444;
         }
 
+        /* Status Indicator */
         .status {
             position: fixed;
             bottom: 20px;
             right: 20px;
             font-size: 18px;
             opacity: 0.5;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
         }
 
         .status.connected {
@@ -142,7 +188,7 @@
     <div class="container">
         <div class="header">
             <h1>BLITZ ANKARA v2</h1>
-            <p>Live Presentations</p>
+            <div class="subtitle" id="event-subtitle">Live Event</div>
         </div>
 
         <div id="content" class="loading">
@@ -150,7 +196,7 @@
         </div>
     </div>
 
-    <div id="status" class="status">●</div>
+    <div id="status" class="status">● Connecting</div>
 
     <script>
         // Configuration
@@ -159,12 +205,14 @@
         var POLL_INTERVAL = 3000; // 3 seconds
 
         // State
+        var eventData = null;
         var currentPresenter = null;
         var allProjects = [];
         var statusElement = document.getElementById('status');
         var contentElement = document.getElementById('content');
+        var subtitleElement = document.getElementById('event-subtitle');
 
-        // Utility: Make HTTP request (old browser compatible)
+        // Utility: Make HTTP request
         function httpGet(url, callback) {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
@@ -179,16 +227,16 @@
                         }
                     } else if (xhr.status === 0) {
                         console.error('Network error or CORS blocked:', url);
-                        callback('Network error - check CORS or internet connection');
+                        callback('Network error');
                     } else {
-                        console.error('HTTP error:', xhr.status, xhr.statusText, 'URL:', url);
-                        callback('HTTP ' + xhr.status + ': ' + xhr.statusText);
+                        console.error('HTTP error:', xhr.status, xhr.statusText);
+                        callback('HTTP ' + xhr.status);
                     }
                 }
             };
             xhr.onerror = function() {
-                console.error('XHR error event for:', url);
-                callback('Network request failed');
+                console.error('XHR error for:', url);
+                callback('Network failed');
             };
             xhr.open('GET', url, true);
             xhr.send();
@@ -208,6 +256,197 @@
             }
         }
 
+        // Format time in 12-hour format
+        function formatTime12Hour(date) {
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+        // Calculate current schedule item
+        function getCurrentScheduleInfo(schedule, eventStartTime) {
+            if (!schedule || schedule.length === 0) {
+                return null;
+            }
+
+            var now = new Date();
+            var calculatedSchedule = [];
+
+            // Process schedule items
+            for (var i = 0; i < schedule.length; i++) {
+                var item = schedule[i];
+                var startTime, endTime;
+
+                // New format: absolute timestamps
+                if (item.start_time && item.end_time) {
+                    startTime = new Date(item.start_time);
+                    endTime = new Date(item.end_time);
+                }
+                // Legacy format: offset-based
+                else if (typeof item.offset_minutes !== 'undefined' && item.duration_minutes) {
+                    var eventStart = new Date(eventStartTime);
+                    startTime = new Date(eventStart.getTime() + item.offset_minutes * 60 * 1000);
+                    endTime = new Date(startTime.getTime() + item.duration_minutes * 60 * 1000);
+                }
+                else {
+                    continue;
+                }
+
+                var timeDisplay = formatTime12Hour(startTime) + ' - ' + formatTime12Hour(endTime);
+
+                calculatedSchedule.push({
+                    activity: item.activity,
+                    type: item.type,
+                    startTime: startTime,
+                    endTime: endTime,
+                    timeDisplay: timeDisplay
+                });
+            }
+
+            // Sort by start time
+            calculatedSchedule.sort(function(a, b) {
+                return a.startTime.getTime() - b.startTime.getTime();
+            });
+
+            // Find current activity
+            for (var j = 0; j < calculatedSchedule.length; j++) {
+                if (now >= calculatedSchedule[j].startTime && now < calculatedSchedule[j].endTime) {
+                    var nextActivity = j + 1 < calculatedSchedule.length
+                        ? calculatedSchedule[j + 1]
+                        : null;
+
+                    return {
+                        activity: calculatedSchedule[j].activity,
+                        timeDisplay: calculatedSchedule[j].timeDisplay,
+                        nextActivity: nextActivity ? nextActivity.activity : null,
+                        nextTime: nextActivity ? nextActivity.timeDisplay : null
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        // Create DOM element with text content
+        function createElement(tag, className, text) {
+            var el = document.createElement(tag);
+            if (className) el.className = className;
+            if (text) el.textContent = text;
+            return el;
+        }
+
+        // Render the UI
+        function render() {
+            contentElement.innerHTML = '';
+
+            // Get current schedule info
+            var scheduleInfo = eventData && eventData.schedule
+                ? getCurrentScheduleInfo(eventData.schedule, eventData.start_time)
+                : null;
+
+            // Current Schedule Section
+            var currentSection = createElement('div', 'current-section');
+            var sectionTitle = createElement('div', 'section-title', 'HAPPENING NOW');
+            currentSection.appendChild(sectionTitle);
+
+            if (scheduleInfo) {
+                var card = createElement('div', 'current-card');
+
+                var activity = createElement('div', 'activity', scheduleInfo.activity);
+                card.appendChild(activity);
+
+                var time = createElement('div', 'time', scheduleInfo.timeDisplay);
+                card.appendChild(time);
+
+                if (scheduleInfo.nextActivity) {
+                    var nextUp = createElement('div', 'next-up');
+                    var nextLabel = createElement('strong', null, 'Next Up: ');
+                    var nextText = document.createTextNode(scheduleInfo.nextActivity);
+                    nextUp.appendChild(nextLabel);
+                    nextUp.appendChild(nextText);
+                    if (scheduleInfo.nextTime) {
+                        var nextTimeText = document.createTextNode(' • ' + scheduleInfo.nextTime);
+                        nextUp.appendChild(nextTimeText);
+                    }
+                    card.appendChild(nextUp);
+                }
+
+                currentSection.appendChild(card);
+            } else {
+                var noActivity = createElement('div', 'no-activity');
+                var msg = createElement('p', null, 'No scheduled activity right now');
+                noActivity.appendChild(msg);
+                currentSection.appendChild(noActivity);
+            }
+
+            contentElement.appendChild(currentSection);
+
+            // Current Presenter (if presenting)
+            if (currentPresenter) {
+                var presenterSection = createElement('div', 'presenter-section');
+                var presenterTitle = createElement('div', 'section-title', 'CURRENTLY PRESENTING');
+                presenterSection.appendChild(presenterTitle);
+
+                var presenterCard = createElement('div', 'presenter-card');
+                var title = createElement('h3', null, currentPresenter.title || '');
+                var team = createElement('div', 'team', currentPresenter.teamMembers || '');
+                var desc = createElement('div', 'description', currentPresenter.description || '');
+
+                presenterCard.appendChild(title);
+                presenterCard.appendChild(team);
+                presenterCard.appendChild(desc);
+                presenterSection.appendChild(presenterCard);
+
+                contentElement.appendChild(presenterSection);
+            }
+
+            // All Projects Grid
+            if (allProjects.length > 0) {
+                var projectsGrid = createElement('div', 'projects-grid');
+                var projectsTitle = createElement('div', 'section-title', 'ALL PROJECTS');
+                projectsGrid.appendChild(projectsTitle);
+
+                for (var i = 0; i < allProjects.length; i++) {
+                    var project = allProjects[i];
+                    var item = createElement('div', 'project-item');
+                    var itemTitle = createElement('h4', null, project.title || '');
+                    var itemTeam = createElement('div', 'team', project.team_members || '');
+
+                    item.appendChild(itemTitle);
+                    item.appendChild(itemTeam);
+                    projectsGrid.appendChild(item);
+                }
+
+                contentElement.appendChild(projectsGrid);
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            contentElement.innerHTML = '';
+            var errorDiv = createElement('div', 'error');
+            var errorP = createElement('p', null, 'Error: ' + message);
+            errorDiv.appendChild(errorP);
+            contentElement.appendChild(errorDiv);
+            updateStatus(false, true);
+        }
+
+        // Fetch event data
+        function fetchEvent(callback) {
+            var url = API_BASE + '/api/events/' + EVENT_SLUG;
+            httpGet(url, function(err, data) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                callback(null, data.event);
+            });
+        }
+
         // Fetch current presenter
         function fetchPresenter(callback) {
             var url = API_BASE + '/api/events/' + EVENT_SLUG + '/presenter';
@@ -216,7 +455,6 @@
                     callback(err);
                     return;
                 }
-                // currentPresenter can be null if no one is presenting - this is OK
                 callback(null, data.currentPresenter || null);
             });
         }
@@ -233,96 +471,37 @@
             });
         }
 
-        // Create DOM element with text content
-        function createElement(tag, className, text) {
-            var el = document.createElement(tag);
-            if (className) el.className = className;
-            if (text) el.textContent = text;
-            return el;
-        }
-
-        // Render the UI
-        function render() {
-            // Clear content
-            contentElement.innerHTML = '';
-
-            // Currently presenting section
-            var presenterSection = createElement('div', 'presenter-section');
-            var sectionTitle = createElement('h2', 'section-title', 'Currently Presenting');
-            presenterSection.appendChild(sectionTitle);
-
-            if (currentPresenter) {
-                var card = createElement('div', 'presenter-card');
-                var title = createElement('h2', null, currentPresenter.title || '');
-                var team = createElement('div', 'team', currentPresenter.teamMembers || '');
-                var desc = createElement('div', 'description', currentPresenter.description || '');
-
-                card.appendChild(title);
-                card.appendChild(team);
-                card.appendChild(desc);
-                presenterSection.appendChild(card);
-            } else {
-                var noPresenter = createElement('div', 'no-presenter');
-                var msg = createElement('p', null, 'No one is presenting right now');
-                noPresenter.appendChild(msg);
-                presenterSection.appendChild(noPresenter);
-            }
-
-            contentElement.appendChild(presenterSection);
-
-            // All projects list
-            if (allProjects.length > 0) {
-                var projectsList = createElement('div', 'projects-list');
-                var projectsTitle = createElement('h2', 'section-title', 'All Projects');
-                projectsList.appendChild(projectsTitle);
-
-                for (var i = 0; i < allProjects.length; i++) {
-                    var project = allProjects[i];
-                    var item = createElement('div', 'project-item');
-                    var itemTitle = createElement('h3', null, project.title || '');
-                    var itemTeam = createElement('div', 'team', project.team_members || '');
-
-                    item.appendChild(itemTitle);
-                    item.appendChild(itemTeam);
-                    projectsList.appendChild(item);
-                }
-
-                contentElement.appendChild(projectsList);
-            }
-        }
-
-        // Show error message
-        function showError(message) {
-            contentElement.innerHTML = '';
-            var errorDiv = createElement('div', 'error');
-            var errorP = createElement('p', null, 'Error: ' + message);
-            errorDiv.appendChild(errorP);
-            contentElement.appendChild(errorDiv);
-            updateStatus(false, true);
-        }
-
-        // Update data
+        // Update all data
         function updateData() {
-            fetchPresenter(function(err, presenter) {
+            fetchEvent(function(err, event) {
                 if (err) {
-                    console.error('Presenter fetch error:', err);
-                    showError('Cannot connect to server. Please check your internet connection.');
+                    console.error('Event fetch error:', err);
+                    showError('Cannot connect to server');
                     return;
                 }
 
-                // presenter can be null - this is fine, just means no one is presenting
-                currentPresenter = presenter;
+                eventData = event;
+                if (event.name) {
+                    subtitleElement.textContent = event.name;
+                }
 
-                fetchProjects(function(err, projects) {
+                fetchPresenter(function(err, presenter) {
                     if (err) {
-                        console.error('Projects fetch error:', err);
-                        showError('Cannot connect to server. Please check your internet connection.');
-                        return;
+                        console.error('Presenter fetch error:', err);
+                        // Don't show error, just continue without presenter
                     }
+                    currentPresenter = presenter;
 
-                    allProjects = projects;
-                    render();
-                    updateStatus(true, false);
+                    fetchProjects(function(err, projects) {
+                        if (err) {
+                            console.error('Projects fetch error:', err);
+                            // Don't show error, just continue without projects
+                        }
+                        allProjects = projects;
+
+                        render();
+                        updateStatus(true, false);
+                    });
                 });
             });
         }
