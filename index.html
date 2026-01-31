@@ -122,6 +122,38 @@
             margin-bottom: 50px;
         }
 
+        /* Deadline Banner */
+        .deadline-banner {
+            background: linear-gradient(135deg, #7c3aed 0%, #6b21a8 100%);
+            border: 6px solid #fff;
+            padding: 40px 60px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 50px;
+            box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .deadline-banner h2 {
+            font-size: 80px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 60px rgba(124, 58, 237, 0.8);
+            }
+        }
+
         .section-title {
             font-size: 42px;
             margin-bottom: 20px;
@@ -706,6 +738,12 @@
         // Render the UI
         function render() {
             contentElement.innerHTML = '';
+
+            // Deadline Banner
+            var deadlineBanner = createElement('div', 'deadline-banner');
+            var deadlineText = createElement('h2', null, 'SUBMISSION DEADLINE IS 18:45');
+            deadlineBanner.appendChild(deadlineText);
+            contentElement.appendChild(deadlineBanner);
 
             // Get current schedule info (hardcoded)
             var scheduleInfo = getCurrentScheduleInfo();
