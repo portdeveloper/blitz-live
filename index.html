@@ -523,6 +523,7 @@
         var currentTimeElement = document.getElementById('current-time');
         var wifiDisplayElement = document.getElementById('wifi-display');
         var wifiInfoElement = document.getElementById('wifi-info');
+        var serverTimeOffset = 0; // Difference between server time and local time
 
         // Utility: Make HTTP request
         function httpGet(url, callback) {
@@ -532,6 +533,13 @@
                     if (xhr.status === 200) {
                         try {
                             var data = JSON.parse(xhr.responseText);
+                            // Get server time from response header
+                            var dateHeader = xhr.getResponseHeader('Date');
+                            if (dateHeader) {
+                                var serverTime = new Date(dateHeader);
+                                var localTime = new Date();
+                                serverTimeOffset = serverTime.getTime() - localTime.getTime();
+                            }
                             callback(null, data);
                         } catch (e) {
                             console.error('Parse error:', e, 'Response:', xhr.responseText);
@@ -582,8 +590,9 @@
         // Update live clock
         function updateClock() {
             var now = new Date();
-            // For old browser compatibility, just use local time
-            currentTimeElement.textContent = formatTime12Hour(now);
+            // Apply server time offset to correct for wrong local clocks
+            var correctedTime = new Date(now.getTime() + serverTimeOffset);
+            currentTimeElement.textContent = formatTime12Hour(correctedTime);
         }
 
         // Update WiFi info
