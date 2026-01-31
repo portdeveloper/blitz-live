@@ -17,11 +17,25 @@
             font-family: Arial, sans-serif;
             padding: 40px;
             line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* Bouncing Video Background */
+        #bouncing-video {
+            position: fixed;
+            width: 400px;
+            height: 300px;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+            border-radius: 8px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
@@ -261,6 +275,10 @@
     </style>
 </head>
 <body>
+    <video id="bouncing-video" autoplay loop muted playsinline>
+        <source src="vid.mp4" type="video/mp4">
+    </video>
+
     <div class="container">
         <div class="header">
             <div class="qr-side qr-left">
@@ -604,11 +622,44 @@
             setInterval(updateData, POLL_INTERVAL);
         }
 
+        // DVD-style bouncing video animation
+        function initBouncingVideo() {
+            var video = document.getElementById('bouncing-video');
+            var x = Math.random() * (window.innerWidth - 400);
+            var y = Math.random() * (window.innerHeight - 300);
+            var speedX = 2;
+            var speedY = 2;
+
+            function animate() {
+                x += speedX;
+                y += speedY;
+
+                // Bounce off edges
+                if (x + 400 >= window.innerWidth || x <= 0) {
+                    speedX = -speedX;
+                }
+                if (y + 300 >= window.innerHeight || y <= 0) {
+                    speedY = -speedY;
+                }
+
+                video.style.left = x + 'px';
+                video.style.top = y + 'px';
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
         // Start when page loads
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
+            document.addEventListener('DOMContentLoaded', function() {
+                init();
+                initBouncingVideo();
+            });
         } else {
             init();
+            initBouncingVideo();
         }
     </script>
 </body>
