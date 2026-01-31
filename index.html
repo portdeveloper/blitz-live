@@ -274,23 +274,29 @@
 
         /* Post-deadline content */
         .post-deadline {
-            text-align: center;
-            padding: 60px 40px;
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
         }
 
-        .post-deadline.dinner {
+        .post-deadline-main {
+            flex: 1;
+            text-align: center;
+        }
+
+        .dinner-message {
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             border: 4px solid #fff;
             padding: 80px;
             border-radius: 16px;
         }
 
-        .post-deadline.dinner h2 {
+        .dinner-message h2 {
             font-size: 72px;
             margin-bottom: 20px;
         }
 
-        .post-deadline.dinner p {
+        .dinner-message p {
             font-size: 42px;
             opacity: 0.8;
         }
@@ -328,46 +334,53 @@
             opacity: 0.7;
         }
 
-        /* Presentation Order List */
+        /* Presentation Order List - Right Sidebar */
         .presentation-order {
-            margin-top: 50px;
+            width: 400px;
+            background: rgba(10, 10, 10, 0.9);
+            border: 3px solid #7c3aed;
+            border-radius: 12px;
+            padding: 25px;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .presentation-order h3 {
-            font-size: 42px;
-            margin-bottom: 25px;
+            font-size: 24px;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            opacity: 0.7;
-            letter-spacing: 2px;
+            opacity: 0.8;
+            letter-spacing: 1px;
             text-align: center;
+            color: #7c3aed;
         }
 
         .order-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .order-item {
-            background-color: rgba(10, 10, 10, 0.8);
+            background-color: rgba(20, 20, 20, 0.8);
             border-left: 3px solid #7c3aed;
-            padding: 20px 30px;
-            backdrop-filter: blur(3px);
+            padding: 12px 18px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            border-radius: 4px;
         }
 
         .order-item.current {
-            border-left: 6px solid #4ade80;
-            background-color: rgba(124, 58, 237, 0.2);
+            border-left: 5px solid #4ade80;
+            background-color: rgba(124, 58, 237, 0.3);
         }
 
         .order-item .number {
-            font-size: 36px;
+            font-size: 22px;
             font-weight: bold;
             color: #7c3aed;
-            min-width: 50px;
+            min-width: 35px;
         }
 
         .order-item.current .number {
@@ -375,7 +388,8 @@
         }
 
         .order-item .project-name {
-            font-size: 32px;
+            font-size: 20px;
+            line-height: 1.3;
         }
 
         /* Loading & Error States */
@@ -608,7 +622,7 @@
     </div>
 
     <div id="status" class="status">● Connecting</div>
-    <div class="version">v2.2</div>
+    <div class="version">v2.3</div>
 
     <div id="tweet-modal" class="modal-overlay">
         <div class="modal-content">
@@ -939,6 +953,10 @@
 
                 // Show post-deadline content
                 postDeadlineElement.innerHTML = '';
+                postDeadlineElement.className = 'post-deadline';
+
+                // Main content container
+                var mainContent = createElement('div', 'post-deadline-main');
 
                 if (currentPresenter) {
                     // Show presenter
@@ -952,21 +970,23 @@
                     presenterDiv.appendChild(title);
                     presenterDiv.appendChild(team);
                     presenterDiv.appendChild(desc);
-                    postDeadlineElement.appendChild(presenterDiv);
+                    mainContent.appendChild(presenterDiv);
                 } else {
                     // Show dinner message
-                    var dinnerDiv = createElement('div', 'post-deadline dinner');
+                    var dinnerDiv = createElement('div', 'dinner-message');
                     var dinnerTitle = createElement('h2', null, 'Enjoy Your Dinner! 🍽️');
                     var dinnerText = createElement('p', null, 'Presentations will begin shortly');
                     dinnerDiv.appendChild(dinnerTitle);
                     dinnerDiv.appendChild(dinnerText);
-                    postDeadlineElement.appendChild(dinnerDiv);
+                    mainContent.appendChild(dinnerDiv);
                 }
 
-                // Show presentation order (alphabetical)
+                postDeadlineElement.appendChild(mainContent);
+
+                // Show presentation order on the right (alphabetical)
                 if (allProjects.length > 0) {
                     var orderSection = createElement('div', 'presentation-order');
-                    var orderTitle = createElement('h3', null, 'Presentation Order (Alphabetical)');
+                    var orderTitle = createElement('h3', null, 'Presentation Order');
                     orderSection.appendChild(orderTitle);
 
                     var orderList = createElement('div', 'order-list');
