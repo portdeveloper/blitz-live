@@ -773,8 +773,8 @@
             return el;
         }
 
-        // Render the UI
-        function render() {
+        // Initialize deadline banner (only once)
+        function initDeadlineBanner() {
             contentElement.innerHTML = '';
 
             // Deadline Banner
@@ -787,10 +787,11 @@
             deadlineCountdownElement = countdown;
 
             contentElement.appendChild(deadlineBanner);
+        }
 
-            // Get current schedule info (hardcoded)
-            // var scheduleInfo = getCurrentScheduleInfo();
-
+        // Render the UI (no longer recreates banner)
+        function render() {
+            // Nothing to render - deadline banner is static
             // Removed: Current Schedule Section, Presenter Section, Projects Grid
         }
 
@@ -911,7 +912,9 @@
         // Initialize
         function init() {
             updateStatus(false, false);
+            initDeadlineBanner(); // Create banner once
             updateClock();
+            updateDeadlineCountdown(); // Initial countdown update
             updateData();
             setInterval(updateData, POLL_INTERVAL);
             setInterval(updateClock, 1000); // Update clock every second
