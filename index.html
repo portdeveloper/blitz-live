@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blitz Ankara v2 - Live Presentations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 3px solid #fff;
+            padding-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 36px;
+            opacity: 0.8;
+        }
+
+        .presenter-section {
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .presenter-card {
+            background-color: #1a1a1a;
+            border: 3px solid #fff;
+            padding: 40px;
+            border-radius: 8px;
+        }
+
+        .presenter-card h2 {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .presenter-card .team {
+            font-size: 36px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .presenter-card .description {
+            font-size: 32px;
+            line-height: 1.8;
+            opacity: 0.85;
+        }
+
+        .no-presenter {
+            text-align: center;
+            padding: 100px 40px;
+            opacity: 0.6;
+        }
+
+        .no-presenter p {
+            font-size: 48px;
+        }
+
+        .projects-list {
+            margin-top: 60px;
+        }
+
+        .project-item {
+            background-color: #0a0a0a;
+            border-left: 4px solid #fff;
+            padding: 20px 30px;
+            margin-bottom: 15px;
+        }
+
+        .project-item h3 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .project-item .team {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px;
+            font-size: 48px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 100px;
+            font-size: 36px;
+            color: #ff4444;
+        }
+
+        .status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 18px;
+            opacity: 0.5;
+        }
+
+        .status.connected {
+            color: #4ade80;
+        }
+
+        .status.error {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BLITZ ANKARA v2</h1>
+            <p>Live Presentations</p>
+        </div>
+
+        <div id="content" class="loading">
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <div id="status" class="status">●</div>
+
+    <script>
+        // Configuration
+        var API_BASE = 'https://blitz.devnads.com';
+        var EVENT_SLUG = 'blitz-ankara-v2';
+        var POLL_INTERVAL = 3000; // 3 seconds
+
+        // State
+        var currentPresenter = null;
+        var allProjects = [];
+        var statusElement = document.getElementById('status');
+        var contentElement = document.getElementById('content');
+
+        // Utility: Make HTTP request (old browser compatible)
+        function httpGet(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            callback(null, data);
+                        } catch (e) {
+                            console.error('Parse error:', e, 'Response:', xhr.responseText);
+                            callback('Parse error: ' + e.message);
+                        }
+                    } else if (xhr.status === 0) {
+                        console.error('Network error or CORS blocked:', url);
+                        callback('Network error - check CORS or internet connection');
+                    } else {
+                        console.error('HTTP error:', xhr.status, xhr.statusText, 'URL:', url);
+                        callback('HTTP ' + xhr.status + ': ' + xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function() {
+                console.error('XHR error event for:', url);
+                callback('Network request failed');
+            };
+            xhr.open('GET', url, true);
+            xhr.send();
+        }
+
+        // Update status indicator
+        function updateStatus(isConnected, isError) {
+            if (isError) {
+                statusElement.className = 'status error';
+                statusElement.textContent = '● Error';
+            } else if (isConnected) {
+                statusElement.className = 'status connected';
+                statusElement.textContent = '● Live';
+            } else {
+                statusElement.className = 'status';
+                statusElement.textContent = '● Connecting';
+            }
+        }
+
+        // Fetch current presenter
+        function fetchPresenter(callback) {
+            var url = API_BASE + '/api/events/' + EVENT_SLUG + '/presenter';
+            httpGet(url, function(err, data) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                // currentPresenter can be null if no one is presenting - this is OK
+                callback(null, data.currentPresenter || null);
+            });
+        }
+
+        // Fetch all projects
+        function fetchProjects(callback) {
+            var url = API_BASE + '/api/events/' + EVENT_SLUG + '/projects';
+            httpGet(url, function(err, data) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                callback(null, data.projects || []);
+            });
+        }
+
+        // Create DOM element with text content
+        function createElement(tag, className, text) {
+            var el = document.createElement(tag);
+            if (className) el.className = className;
+            if (text) el.textContent = text;
+            return el;
+        }
+
+        // Render the UI
+        function render() {
+            // Clear content
+            contentElement.innerHTML = '';
+
+            // Currently presenting section
+            var presenterSection = createElement('div', 'presenter-section');
+            var sectionTitle = createElement('h2', 'section-title', 'Currently Presenting');
+            presenterSection.appendChild(sectionTitle);
+
+            if (currentPresenter) {
+                var card = createElement('div', 'presenter-card');
+                var title = createElement('h2', null, currentPresenter.title || '');
+                var team = createElement('div', 'team', currentPresenter.teamMembers || '');
+                var desc = createElement('div', 'description', currentPresenter.description || '');
+
+                card.appendChild(title);
+                card.appendChild(team);
+                card.appendChild(desc);
+                presenterSection.appendChild(card);
+            } else {
+                var noPresenter = createElement('div', 'no-presenter');
+                var msg = createElement('p', null, 'No one is presenting right now');
+                noPresenter.appendChild(msg);
+                presenterSection.appendChild(noPresenter);
+            }
+
+            contentElement.appendChild(presenterSection);
+
+            // All projects list
+            if (allProjects.length > 0) {
+                var projectsList = createElement('div', 'projects-list');
+                var projectsTitle = createElement('h2', 'section-title', 'All Projects');
+                projectsList.appendChild(projectsTitle);
+
+                for (var i = 0; i < allProjects.length; i++) {
+                    var project = allProjects[i];
+                    var item = createElement('div', 'project-item');
+                    var itemTitle = createElement('h3', null, project.title || '');
+                    var itemTeam = createElement('div', 'team', project.team_members || '');
+
+                    item.appendChild(itemTitle);
+                    item.appendChild(itemTeam);
+                    projectsList.appendChild(item);
+                }
+
+                contentElement.appendChild(projectsList);
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            contentElement.innerHTML = '';
+            var errorDiv = createElement('div', 'error');
+            var errorP = createElement('p', null, 'Error: ' + message);
+            errorDiv.appendChild(errorP);
+            contentElement.appendChild(errorDiv);
+            updateStatus(false, true);
+        }
+
+        // Update data
+        function updateData() {
+            fetchPresenter(function(err, presenter) {
+                if (err) {
+                    console.error('Presenter fetch error:', err);
+                    showError('Cannot connect to server. Please check your internet connection.');
+                    return;
+                }
+
+                // presenter can be null - this is fine, just means no one is presenting
+                currentPresenter = presenter;
+
+                fetchProjects(function(err, projects) {
+                    if (err) {
+                        console.error('Projects fetch error:', err);
+                        showError('Cannot connect to server. Please check your internet connection.');
+                        return;
+                    }
+
+                    allProjects = projects;
+                    render();
+                    updateStatus(true, false);
+                });
+            });
+        }
+
+        // Initialize
+        function init() {
+            updateStatus(false, false);
+            updateData();
+            setInterval(updateData, POLL_INTERVAL);
+        }
+
+        // Start when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
