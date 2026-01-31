@@ -218,16 +218,23 @@
             color: #ff4444;
         }
 
-        /* Bottom QR Code */
+        /* Bottom QR Codes */
         .qr-bottom {
             position: fixed;
             bottom: 60px;
-            right: 20px;
             text-align: center;
             background: rgba(0,0,0,0.9);
             padding: 15px;
             border-radius: 12px;
             border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .qr-bottom-left {
+            left: 20px;
+        }
+
+        .qr-bottom-right {
+            right: 20px;
         }
 
         .qr-bottom img {
@@ -266,7 +273,12 @@
         </div>
     </div>
 
-    <div class="qr-bottom">
+    <div class="qr-bottom qr-bottom-left">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://x.com/monad_dev" alt="Twitter QR">
+        <div class="label">x.com/monad_dev</div>
+    </div>
+
+    <div class="qr-bottom qr-bottom-right">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://blitz.devnads.com" alt="Blitz QR">
         <div class="label">blitz.devnads.com</div>
     </div>
