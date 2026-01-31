@@ -648,8 +648,10 @@
         // Calculate current schedule item from hardcoded schedule
         function getCurrentScheduleInfo() {
             var now = new Date();
-            var currentHour = now.getHours();
-            var currentMinute = now.getMinutes();
+            // Apply server time offset to get correct time
+            var correctedTime = new Date(now.getTime() + serverTimeOffset);
+            var currentHour = correctedTime.getHours();
+            var currentMinute = correctedTime.getMinutes();
             var currentTimeInMinutes = currentHour * 60 + currentMinute;
 
             function timeToMinutes(timeStr) {
