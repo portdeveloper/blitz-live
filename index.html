@@ -328,6 +328,56 @@
             opacity: 0.7;
         }
 
+        /* Presentation Order List */
+        .presentation-order {
+            margin-top: 50px;
+        }
+
+        .presentation-order h3 {
+            font-size: 42px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .order-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .order-item {
+            background-color: rgba(10, 10, 10, 0.8);
+            border-left: 3px solid #7c3aed;
+            padding: 20px 30px;
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .order-item.current {
+            border-left: 6px solid #4ade80;
+            background-color: rgba(124, 58, 237, 0.2);
+        }
+
+        .order-item .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #7c3aed;
+            min-width: 50px;
+        }
+
+        .order-item.current .number {
+            color: #4ade80;
+        }
+
+        .order-item .project-name {
+            font-size: 32px;
+        }
+
         /* Loading & Error States */
         .loading {
             text-align: center;
@@ -558,7 +608,7 @@
     </div>
 
     <div id="status" class="status">● Connecting</div>
-    <div class="version">v2.1</div>
+    <div class="version">v2.2</div>
 
     <div id="tweet-modal" class="modal-overlay">
         <div class="modal-content">
@@ -911,6 +961,39 @@
                     dinnerDiv.appendChild(dinnerTitle);
                     dinnerDiv.appendChild(dinnerText);
                     postDeadlineElement.appendChild(dinnerDiv);
+                }
+
+                // Show presentation order (alphabetical)
+                if (allProjects.length > 0) {
+                    var orderSection = createElement('div', 'presentation-order');
+                    var orderTitle = createElement('h3', null, 'Presentation Order (Alphabetical)');
+                    orderSection.appendChild(orderTitle);
+
+                    var orderList = createElement('div', 'order-list');
+
+                    // Sort projects alphabetically by title
+                    var sortedProjects = allProjects.slice().sort(function(a, b) {
+                        var titleA = (a.title || '').toLowerCase();
+                        var titleB = (b.title || '').toLowerCase();
+                        return titleA.localeCompare(titleB);
+                    });
+
+                    for (var i = 0; i < sortedProjects.length; i++) {
+                        var project = sortedProjects[i];
+                        var isCurrent = currentPresenter && currentPresenter.projectId === project.id;
+                        var itemClass = isCurrent ? 'order-item current' : 'order-item';
+
+                        var item = createElement('div', itemClass);
+                        var number = createElement('div', 'number', (i + 1).toString());
+                        var name = createElement('div', 'project-name', project.title || '');
+
+                        item.appendChild(number);
+                        item.appendChild(name);
+                        orderList.appendChild(item);
+                    }
+
+                    orderSection.appendChild(orderList);
+                    postDeadlineElement.appendChild(orderSection);
                 }
             } else {
                 // Show deadline banner
