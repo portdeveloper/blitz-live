@@ -244,7 +244,7 @@
         /* Status Indicator */
         .status {
             position: fixed;
-            bottom: 20px;
+            bottom: 70px;
             right: 20px;
             font-size: 18px;
             opacity: 0.5;
@@ -261,10 +261,51 @@
             color: #ff4444;
         }
 
+        /* News Ticker */
+        .news-ticker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(90deg, #6b21a8 0%, #7c3aed 50%, #6b21a8 100%);
+            overflow: hidden;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-content {
+            display: flex;
+            white-space: nowrap;
+            animation: scroll-left 60s linear infinite;
+        }
+
+        .ticker-item {
+            padding: 0 80px;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .ticker-separator {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 0 20px;
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
         /* Bottom QR Codes */
         .qr-bottom {
             position: fixed;
-            bottom: 60px;
+            bottom: 110px;
             text-align: center;
             background: rgba(0,0,0,0.9);
             padding: 15px;
@@ -338,6 +379,44 @@
     </div>
 
     <div id="status" class="status">● Connecting</div>
+
+    <div class="news-ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">BUILD AGENTS</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">CHECK OUT MOLTBOOK</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">USE OPENCLAW</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">FOLLOW @MONAD_DEV ON TWITTER</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">JOIN DISCORD.GG/MONADDEV</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">READ DOCS.MONAD.XYZ</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">SUBMIT YOUR PROJECT</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">CLAIM TOKENS AT BLITZ.DEVNADS.COM</span>
+            <span class="ticker-separator">●</span>
+            <!-- Duplicate for seamless loop -->
+            <span class="ticker-item">BUILD AGENTS</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">CHECK OUT MOLTBOOK</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">USE OPENCLAW</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">FOLLOW @MONAD_DEV ON TWITTER</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">JOIN DISCORD.GG/MONADDEV</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">READ DOCS.MONAD.XYZ</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">SUBMIT YOUR PROJECT</span>
+            <span class="ticker-separator">●</span>
+            <span class="ticker-item">CLAIM TOKENS AT BLITZ.DEVNADS.COM</span>
+            <span class="ticker-separator">●</span>
+        </div>
+    </div>
 
     <script>
         // Configuration
