@@ -217,6 +217,32 @@
         .status.error {
             color: #ff4444;
         }
+
+        /* Bottom QR Code */
+        .qr-bottom {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .qr-bottom img {
+            width: 120px;
+            height: 120px;
+            background: white;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .qr-bottom .label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -228,7 +254,6 @@
             </div>
             <div class="header-content">
                 <h1>BLITZ ANKARA v2</h1>
-                <div class="subtitle" id="event-subtitle">Live Event</div>
             </div>
             <div class="qr-side qr-right">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://discord.gg/monaddev" alt="Discord QR">
@@ -239,6 +264,11 @@
         <div id="content" class="loading">
             <p>Loading...</p>
         </div>
+    </div>
+
+    <div class="qr-bottom">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://blitz.devnads.com" alt="Blitz QR">
+        <div class="label">blitz.devnads.com</div>
     </div>
 
     <div id="status" class="status">● Connecting</div>
@@ -255,7 +285,6 @@
         var allProjects = [];
         var statusElement = document.getElementById('status');
         var contentElement = document.getElementById('content');
-        var subtitleElement = document.getElementById('event-subtitle');
 
         // Utility: Make HTTP request
         function httpGet(url, callback) {
@@ -526,9 +555,6 @@
                 }
 
                 eventData = event;
-                if (event.name) {
-                    subtitleElement.textContent = event.name;
-                }
 
                 fetchPresenter(function(err, presenter) {
                     if (err) {
