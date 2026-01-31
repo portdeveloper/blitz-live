@@ -746,83 +746,9 @@
             contentElement.appendChild(deadlineBanner);
 
             // Get current schedule info (hardcoded)
-            var scheduleInfo = getCurrentScheduleInfo();
+            // var scheduleInfo = getCurrentScheduleInfo();
 
-            // Current Schedule Section
-            var currentSection = createElement('div', 'current-section');
-            var sectionTitle = createElement('div', 'section-title', 'HAPPENING NOW');
-            currentSection.appendChild(sectionTitle);
-
-            if (scheduleInfo) {
-                var card = createElement('div', 'current-card');
-
-                var activity = createElement('div', 'activity', scheduleInfo.activity);
-                card.appendChild(activity);
-
-                var time = createElement('div', 'time', scheduleInfo.timeDisplay);
-                card.appendChild(time);
-
-                if (scheduleInfo.nextActivity) {
-                    var nextUp = createElement('div', 'next-up');
-                    var nextLabel = createElement('strong', null, 'Next Up: ');
-                    var nextText = document.createTextNode(scheduleInfo.nextActivity);
-                    nextUp.appendChild(nextLabel);
-                    nextUp.appendChild(nextText);
-                    if (scheduleInfo.nextTime) {
-                        var nextTimeText = document.createTextNode(' • ' + scheduleInfo.nextTime);
-                        nextUp.appendChild(nextTimeText);
-                    }
-                    card.appendChild(nextUp);
-                }
-
-                currentSection.appendChild(card);
-            } else {
-                var noActivity = createElement('div', 'no-activity');
-                var msg = createElement('p', null, 'No scheduled activity right now');
-                noActivity.appendChild(msg);
-                currentSection.appendChild(noActivity);
-            }
-
-            contentElement.appendChild(currentSection);
-
-            // Current Presenter (if presenting)
-            if (currentPresenter) {
-                var presenterSection = createElement('div', 'presenter-section');
-                var presenterTitle = createElement('div', 'section-title', 'CURRENTLY PRESENTING');
-                presenterSection.appendChild(presenterTitle);
-
-                var presenterCard = createElement('div', 'presenter-card');
-                var title = createElement('h3', null, currentPresenter.title || '');
-                var team = createElement('div', 'team', currentPresenter.teamMembers || '');
-                var desc = createElement('div', 'description', currentPresenter.description || '');
-
-                presenterCard.appendChild(title);
-                presenterCard.appendChild(team);
-                presenterCard.appendChild(desc);
-                presenterSection.appendChild(presenterCard);
-
-                contentElement.appendChild(presenterSection);
-            }
-
-            // All Projects Grid
-            if (allProjects.length > 0) {
-                var projectsGrid = createElement('div', 'projects-grid');
-                var projectsTitle = createElement('div', 'section-title', 'ALL PROJECTS');
-                projectsGrid.appendChild(projectsTitle);
-
-                for (var i = 0; i < allProjects.length; i++) {
-                    var project = allProjects[i];
-                    var item = createElement('div', 'project-item');
-                    var itemTitle = createElement('h4', null, project.title || '');
-                    var itemTeam = createElement('div', 'team', project.team_members || '');
-
-                    item.appendChild(itemTitle);
-                    item.appendChild(itemTeam);
-                    projectsGrid.appendChild(item);
-                }
-
-                contentElement.appendChild(projectsGrid);
-            }
+            // Removed: Current Schedule Section, Presenter Section, Projects Grid
         }
 
         // Show error message
